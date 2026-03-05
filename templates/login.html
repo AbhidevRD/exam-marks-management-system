@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Exam Management Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #ff758c, #ff7eb3);
+            overflow: hidden;
+        }
+
+        /* Floating background circles */
+        body::before,
+        body::after {
+            content: "";
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        body::before {
+            top: -100px;
+            left: -100px;
+        }
+
+        body::after {
+            bottom: -100px;
+            right: -100px;
+            animation-delay: 3s;
+        }
+
+        @keyframes float {
+            0%,100% { transform: translateY(0px); }
+            50% { transform: translateY(20px); }
+        }
+
+        .login-container {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(15px);
+            padding: 40px;
+            border-radius: 20px;
+            width: 350px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+
+            animation: slideUp 0.8s ease forwards;
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        @keyframes slideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: none;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            background: linear-gradient(45deg, #ff4e50, #f9d423);
+            color: white;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255,255,255,0.6);
+        }
+
+        .role-toggle {
+            display: flex;
+            margin-bottom: 15px;
+        }
+
+        .role-btn {
+            flex: 1;
+            padding: 10px;
+            cursor: pointer;
+            border: none;
+            background: rgba(255,255,255,0.3);
+            color: white;
+            transition: 0.3s;
+        }
+
+        .role-btn.active {
+            background: white;
+            color: #ff4e50;
+            font-weight: bold;
+        }
+
+        .role-btn:first-child {
+            border-radius: 8px 0 0 8px;
+        }
+
+        .role-btn:last-child {
+            border-radius: 0 8px 8px 0;
+        }
+
+        .flash-box {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+
+    <h2> 🎓 JNV TUMKUR<br> <br> Exam  Marks Management</h2>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash-box" style="background:#ffe4e6; color:#b91c1c;">
+          {% for message in messages %}
+            <p>{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="role-toggle">
+        <button type="button" class="role-btn active" onclick="setRole('student', this)">🎓 Student</button>
+        <button type="button" class="role-btn" onclick="setRole('admin', this)">👨‍💼 Admin</button>
+    </div>
+
+    <form method="POST">
+        <input type="hidden" name="role" id="roleInput" value="student">
+
+        <input type="text" name="unique_id" placeholder="Enter Unique ID" required>
+        <input type="password" name="password" placeholder="Enter Password" required>
+
+        <button type="submit">🚀 Login</button>
+
+        <p style="margin-top:15px; text-align:center;">
+            Don't have an account?
+            <a href="/register" style="color:#ffd369; font-weight:600; text-decoration:none;">
+                Register here
+            </a>
+        </p>
+    </form>
+
+</div>
+
+<script>
+function setRole(role, button) {
+    document.getElementById("roleInput").value = role;
+
+    const buttons = document.querySelectorAll(".role-btn");
+    buttons.forEach(btn => btn.classList.remove("active"));
+
+    button.classList.add("active");
+}
+</script>
+
+</body>
+</html>

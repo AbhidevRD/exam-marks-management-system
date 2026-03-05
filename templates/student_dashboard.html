@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="student-theme">
+
+<div class="layout">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <h2>🎓 Student Panel</h2>
+        <a href="/student">Dashboard</a>
+        <a href="/download_marksheet">Download Marksheet</a>
+        <a href="/logout" class="logout-link">Logout</a>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+
+        <!-- PROFILE HEADER -->
+        <div class="profile-header">
+
+            <div class="avatar-circle">
+                {% if student and student.name %}
+                    {{ student.name[0] | upper }}
+                {% else %}
+                    S
+                {% endif %}
+            </div>
+
+            <div class="student-welcome">
+                <h1>{{ student.name if student else '' }}</h1>
+                <p>
+                    {{ student.class if student else '' }}
+                    {% if student %} - Section {{ student.section }}{% endif %}
+                </p>
+            </div>
+
+        </div>
+
+        <!-- STUDENT DETAILS -->
+        <div class="panel">
+            <h2>📌 Student Details</h2>
+            <p><strong>ID:</strong> {{ student.student_code if student else '' }}</p>
+            <p><strong>Class:</strong> {{ student.class if student else '' }}</p>
+            <p><strong>Section:</strong> {{ student.section if student else '' }}</p>
+            <p><strong>Exam:</strong> {{ exam_name }}</p>
+        </div>
+
+        <!-- MARKS TABLE -->
+        <div class="panel">
+            <h2>📚 Your Marks</h2>
+
+            {% if marks %}
+            <table>
+                <tr>
+                    <th>Subject</th>
+                    <th>Exam</th>
+                    <th>Marks</th>
+                    <th>Grade</th>
+                </tr>
+
+                {% for m in marks %}
+                <tr>
+                    <td>{{ m.subjects.subject_name if m.subjects else '' }}</td>
+                    <td>{{ m.exams.exam_name if m.exams else '' }}</td>
+                    <td>{{ m.marks_obtained }}</td>
+                    <td>
+                        {% if m.marks_obtained >= 90 %} A+
+                        {% elif m.marks_obtained >= 80 %} A
+                        {% elif m.marks_obtained >= 70 %} B
+                        {% elif m.marks_obtained >= 60 %} C
+                        {% else %} F
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+                <p>No marks available.</p>
+            {% endif %}
+        </div>
+
+        <!-- PERFORMANCE GRAPH -->
+        <div class="panel">
+            <h2>📊 Performance Graph</h2>
+            <canvas id="performanceChart"></canvas>
+        </div>
+
+        <!-- SUMMARY -->
+        <div class="panel">
+            <h2>📊 Performance Summary</h2>
+
+            <div class="dashboard-cards">
+
+                <div class="card">
+                    <h3>Total Marks</h3>
+                    <p>{{ total if total is not none else 0 }}</p>
+                </div>
+
+                <div class="card">
+                    <h3>Percentage</h3>
+                    <p>{{ percentage if percentage is not none else 0 }}%</p>
+                </div>
+
+                <div class="card">
+                    <h3>Rank</h3>
+                    <p>#{{ rank if rank is not none else '-' }}</p>
+                </div>
+
+                <div class="card">
+                    <h3>Status</h3>
+                    {% if status == "Pass" %}
+                        <p style="font-weight:700;">🎉 Pass</p>
+                    {% else %}
+                        <p style="font-weight:700;">❌ Fail</p>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <br>
+
+            <a href="/download_marksheet">
+                <button>📄 Download Marksheet PDF</button>
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- SAFE CHART SCRIPT -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const subjectLabels = {{ marks | map(attribute='subjects.subject_name') | list | tojson | safe if marks else "[]" }};
+    const subjectMarks = {{ marks | map(attribute='marks_obtained') | list | tojson | safe if marks else "[]" }};
+
+    if (subjectLabels.length > 0) {
+        new Chart(document.getElementById("performanceChart"), {
+            type: "bar",
+            data: {
+                labels: subjectLabels,
+                datasets: [{
+                    label: "Marks Obtained",
+                    data: subjectMarks,
+                    backgroundColor: [
+                        "#ff9a9e",
+                        "#fbc2eb",
+                        "#f6d365",
+                        "#a18cd1",
+                        "#84fab0",
+                        "#f5576c"
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+});
+</script>
+
+</body>
+</html>

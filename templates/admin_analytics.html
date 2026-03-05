@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Analytics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="layout">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <h2>Exam System</h2>
+        <a href="/admin">Dashboard</a>
+        <a href="/admin/analytics">Analytics</a>
+        <a href="/logout" class="logout-link">Logout</a>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+
+        <div class="topbar">
+            <h1>📊 Admin Analytics Dashboard</h1>
+        </div>
+
+        <!-- SUBJECT AVERAGE -->
+        <div class="panel">
+            <h2>📚 Subject Average</h2>
+            <canvas id="subjectChart"></canvas>
+        </div>
+
+        <!-- TOP STUDENTS -->
+        <div class="panel">
+            <h2>🏆 Top Students</h2>
+            <canvas id="topStudentsChart"></canvas>
+        </div>
+
+        <!-- PASS FAIL -->
+        <div class="panel">
+            <h2>📈 Pass vs Fail</h2>
+            <canvas id="passFailChart"></canvas>
+        </div>
+
+    </div>
+</div>
+
+<!-- JSON Data (SAFE JINJA RENDER) -->
+<script id="analytics-data" type="application/json">
+{
+    "subject_avg": {{ data.subject_avg | tojson | safe }},
+    "top_students": {{ data.top_students | tojson | safe }},
+    "pass_fail": {{ data.pass_fail | tojson | safe }}
+}
+</script>
+
+<script>
+const analyticsData = JSON.parse(
+    document.getElementById("analytics-data").textContent
+);
+
+const subjectData = analyticsData.subject_avg || [];
+const topStudents = analyticsData.top_students || [];
+const passFail = analyticsData.pass_fail || [];
+
+// 📚 Subject Average Chart
+new Chart(document.getElementById("subjectChart"), {
+    type: "bar",
+    data: {
+        labels: subjectData.map(s => s.subject_name),
+        datasets: [{
+            label: "Average Marks",
+            data: subjectData.map(s => s.avg_marks),
+            backgroundColor: "#2563eb"
+        }]
+    },
+    options: {
+        responsive: true
+    }
+});
+
+// 🏆 Top Students Chart
+new Chart(document.getElementById("topStudentsChart"), {
+    type: "bar",
+    data: {
+        labels: topStudents.map(s => s.student_name),
+        datasets: [{
+            label: "Total Marks",
+            data: topStudents.map(s => s.total_marks),
+            backgroundColor: "#16a34a"
+        }]
+    },
+    options: {
+        responsive: true
+    }
+});
+
+// 📈 Pass vs Fail Chart
+new Chart(document.getElementById("passFailChart"), {
+    type: "pie",
+    data: {
+        labels: passFail.map(s => s.status),
+        datasets: [{
+            data: passFail.map(s => s.count),
+            backgroundColor: ["#22c55e", "#ef4444"]
+        }]
+    },
+    options: {
+        responsive: true
+    }
+});
+</script>
+
+</body>
+</html>

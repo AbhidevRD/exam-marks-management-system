@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="layout">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <h2>Exam System</h2>
+        <a href="/admin">Dashboard</a>
+        <a href="/admin/analytics">Analytics</a>
+        <a href="/download_all_excel" class="btn btn-success">
+           Download All Students Marksheet (Excel)</a>
+        <a href="/logout" class="logout-link">Logout</a>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+
+        <!-- TOPBAR -->
+        <div class="topbar">
+            <h1>👨‍💼 Admin Dashboard</h1>
+        </div>
+
+        <!-- FLASH -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-box">
+            {% for category, message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- DASHBOARD CARDS -->
+        <div class="dashboard-cards">
+            <div class="card">
+                <h3>Total Students</h3>
+                <p>{{ students|length }}</p>
+            </div>
+            <div class="card">
+                <h3>Total Subjects</h3>
+                <p>{{ subjects|length }}</p>
+            </div>
+            <div class="card">
+                <h3>Total Exams</h3>
+                <p>{{ exams|length }}</p>
+            </div>
+        </div>
+
+        <div class="card">
+    <h3>Pass Rate</h3>
+    <p>{{ pass_rate }}%</p>
+    </div>
+
+        <div class="panel">
+    <h2>🏆 Top Performers</h2>
+
+    {% if top_students %}
+    <table>
+        <tr>
+            <th>Rank</th>
+            <th>Name</th>
+            <th>Total Marks</th>
+        </tr>
+
+        {% for s in top_students %}
+        <tr>
+            <td>
+                {% if loop.index == 1 %} 🥇
+                {% elif loop.index == 2 %} 🥈
+                {% elif loop.index == 3 %} 🥉
+                {% else %} {{ loop.index }}
+                {% endif %}
+            </td>
+            <td>{{ s.name }}</td>
+            <td>{{ s.total }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+        <p>No data available.</p>
+    {% endif %}
+</div>
+
+<div class="panel">
+    <h2>🕒 Recent Activity</h2>
+
+    {% if recent_logs %}
+        <ul style="list-style:none; padding:0;">
+            {% for log in recent_logs %}
+            <li style="margin-bottom:10px;">
+                <strong>{{ log[0] }}</strong><br>
+                {{ log[1] }}<br>
+                <small>{{ log[2] }}</small>
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No recent activity.</p>
+    {% endif %}
+</div>
+
+        <!-- FORMS GRID -->
+        <div class="grid-2">
+
+            <!-- ADD STUDENT -->
+            <div class="panel">
+                <h2>Add Student</h2>
+                <form method="POST" action="/add_student">
+                    <input type="text" name="name" placeholder="Student Name" required>
+                    <input type="text" name="class" placeholder="Class" required>
+                    <input type="text" name="section" placeholder="Section" required>
+                    <input type="text" name="unique_id" placeholder="Login ID" required>
+                    <input type="password" name="password" placeholder="Password" required>
+                    <button type="submit">Add Student</button>
+                </form>
+            </div>
+
+            <!-- ADD SUBJECT -->
+            <div class="panel">
+                <h2>Add Subject</h2>
+                <form method="POST" action="/add_subject">
+                    <input type="text" name="subject_name" placeholder="Subject Name" required>
+                    <input type="number" name="max_marks" placeholder="Max Marks" required>
+                    <button type="submit">Add Subject</button>
+                </form>
+            </div>
+
+        </div>
+
+        <!-- ADD MARKS -->
+        <div class="panel">
+            <h2>Add Marks</h2>
+            <form method="POST" action="/add_marks" class="marks-form">
+
+                <select name="student_id" required>
+                    <option value="">Select Student</option>
+                    {% for s in students %}
+                    <option value="{{ s.id }}">{{ s.name }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="subject_id" required>
+                    <option value="">Select Subject</option>
+                    {% for sub in subjects %}
+                    <option value="{{ sub.id }}">{{ sub.subject_name }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="exam_id" required>
+                    <option value="">Select Exam</option>
+                    {% for exam in exams %}
+                    <option value="{{ exam.id }}">{{ exam.exam_name }}</option>
+                    {% endfor %}
+                </select>
+
+                <input type="number" name="marks" placeholder="Marks" required>
+                <button type="submit">Add Marks</button>
+            </form>
+        </div>
+
+        <!-- ANALYTICS CHART -->
+        <div class="panel">
+            <h2>📊 Exam Performance</h2>
+
+            <select id="examSelect" class="exam-dropdown">
+                <option value="">Select Exam</option>
+                {% for exam in exams %}
+                <option value="{{ exam.id }}">{{ exam.exam_name }}</option>
+                {% endfor %}
+            </select>
+
+            <canvas id="marksChart" height="100"></canvas>
+        </div>
+
+        <!-- STUDENT TABLE -->
+        <div class="panel">
+            <h2>All Students</h2>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Class</th>
+                    <th>Section</th>
+                    <th>Student Code</th>
+                </tr>
+                {% for s in students %}
+                <tr>
+                    <td>{{ s.name }}</td>
+                    <td>{{ s.class }}</td>
+                    <td>{{ s.section }}</td>
+                    <td>{{ s.student_code }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<script>
+document.getElementById("examSelect").addEventListener("change", function() {
+    const examId = this.value;
+
+    if(!examId) return;
+
+    fetch(`/admin_analytics?exam_id=${examId}`)
+        .then(response => response.json())
+        .then(result => {
+
+            const labels = result.data.map(item => item.student_id);
+            const totals = result.data.map(item => item.total);
+
+            const ctx = document.getElementById('marksChart').getContext('2d');
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Total Marks',
+                        data: totals,
+                        backgroundColor: "#2563eb"
+                    }]
+                }
+            });
+        });
+});
+</script>
+
+</body>
+</html>
