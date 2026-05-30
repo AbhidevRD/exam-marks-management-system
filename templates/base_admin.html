@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Admin Dashboard{% endblock %}</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <h2>Exam Marks Management System</h2>
+        <a href="/admin">📊 Dashboard</a>
+        <a href="/admin/students">👥 Students</a>
+        <a href="/admin/subjects">📚 Subjects</a>
+        <a href="/admin/exams">📝 Exams</a>
+        <a href="/admin/marks">✏️ Add Marks</a>
+        <a href="/admin/view_marks">👁️ View Marks</a>
+        <a href="/admin/analytics">📈 Analytics</a>
+        <a href="/admin/downloads">⬇️ Downloads</a>
+        <a href="/logout" class="logout-link">🚪 Logout</a>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <!-- TOPBAR -->
+        <div class="topbar">
+            <h1>{% block page_title %}👨‍💼 Admin Dashboard{% endblock %}</h1>
+        </div>
+
+        <!-- FLASH MESSAGES -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-box">
+            {% for category, message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- PAGE CONTENT -->
+        {% block content %}
+        {% endblock %}
+    </div>
+</div>
+
+{% block scripts %}
+{% endblock %}
+
+</body>
+</html>

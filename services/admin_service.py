@@ -30,19 +30,16 @@ def get_admin_dashboard_data():
 # =========================================
 def add_subject(subject_name, max_marks):
     
-
     supabase.table("subjects").insert({
-    
         "subject_name": subject_name,
         "max_marks": int(max_marks)
     }).execute()
 
-    supabase.table("students").insert({
-    "user_id": user_id,
-    "name": name,
-    "class": student_class,
-    "section": section
+    supabase.table("audit_logs").insert({
+        "action_type": "ADD_SUBJECT",
+        "description": f"New subject added: {subject_name}"
     }).execute()
+
 
 
 # =========================================
@@ -167,3 +164,17 @@ def get_pass_rate(supabase):
         return 0
 
     return round((passed / total_students) * 100, 2)
+
+
+# =========================================
+# ADD EXAM
+# =========================================
+def add_exam(exam_name):
+    supabase.table("exams").insert({
+        "exam_name": exam_name
+    }).execute()
+
+    supabase.table("audit_logs").insert({
+        "action_type": "ADD_EXAM",
+        "description": f"New exam added: {exam_name}"
+    }).execute()

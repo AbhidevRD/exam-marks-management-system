@@ -1,48 +1,26 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Admin Analytics</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
+{% extends "base_admin.html" %}
 
-<div class="layout">
+{% block title %}Analytics - Admin Dashboard{% endblock %}
+{% block page_title %}📊 Admin Analytics{% endblock %}
 
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-        <h2>Exam System</h2>
-        <a href="/admin">Dashboard</a>
-        <a href="/admin/analytics">Analytics</a>
-        <a href="/logout" class="logout-link">Logout</a>
-    </div>
+{% block content %}
 
-    <!-- MAIN CONTENT -->
-    <div class="main-content">
+<!-- SUBJECT AVERAGE -->
+<div class="panel">
+    <h2>📚 Subject Average</h2>
+    <canvas id="subjectChart"></canvas>
+</div>
 
-        <div class="topbar">
-            <h1>📊 Admin Analytics Dashboard</h1>
-        </div>
+<!-- TOP STUDENTS -->
+<div class="panel">
+    <h2>🏆 Top Students</h2>
+    <canvas id="topStudentsChart"></canvas>
+</div>
 
-        <!-- SUBJECT AVERAGE -->
-        <div class="panel">
-            <h2>📚 Subject Average</h2>
-            <canvas id="subjectChart"></canvas>
-        </div>
-
-        <!-- TOP STUDENTS -->
-        <div class="panel">
-            <h2>🏆 Top Students</h2>
-            <canvas id="topStudentsChart"></canvas>
-        </div>
-
-        <!-- PASS FAIL -->
-        <div class="panel">
-            <h2>📈 Pass vs Fail</h2>
-            <canvas id="passFailChart"></canvas>
-        </div>
-
-    </div>
+<!-- PASS FAIL -->
+<div class="panel">
+    <h2>📈 Pass vs Fail</h2>
+    <canvas id="passFailChart"></canvas>
 </div>
 
 <!-- JSON Data (SAFE JINJA RENDER) -->
@@ -54,6 +32,9 @@
 }
 </script>
 
+{% endblock %}
+
+{% block scripts %}
 <script>
 const analyticsData = JSON.parse(
     document.getElementById("analytics-data").textContent
@@ -110,6 +91,4 @@ new Chart(document.getElementById("passFailChart"), {
     }
 });
 </script>
-
-</body>
-</html>
+{% endblock %}

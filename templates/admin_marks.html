@@ -1,0 +1,59 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Marks Management - Admin Dashboard{% endblock %}
+{% block page_title %}✏️ Marks Management{% endblock %}
+
+{% block content %}
+
+<!-- ADD MARKS FORM -->
+<div class="panel">
+    <h2>➕ Add Marks</h2>
+    <form method="POST" action="/add_marks" class="admin-form marks-form">
+        <div class="form-group">
+            <label>Select Student</label>
+            <select name="student_id" required>
+                <option value="">-- Select Student --</option>
+                {% for s in students %}
+                <option value="{{ s.id }}">{{ s.name }} ({{ s.student_code }})</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label>Select Subject</label>
+                <select name="subject_id" required>
+                    <option value="">-- Select Subject --</option>
+                    {% for sub in subjects %}
+                    <option value="{{ sub.id }}">{{ sub.subject_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Select Exam</label>
+                <select name="exam_id" required>
+                    <option value="">-- Select Exam --</option>
+                    {% for exam in exams %}
+                    <option value="{{ exam.id }}">{{ exam.exam_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Marks Obtained</label>
+            <input type="number" name="marks" placeholder="Enter marks" min="0" required>
+        </div>
+
+        <button type="submit" class="btn-primary">Add Marks</button>
+    </form>
+</div>
+
+<!-- MARKS INFORMATION -->
+<div class="panel">
+    <h2>📊 Marks Overview</h2>
+    <p>Add marks for students in different subjects and exams using the form above.</p>
+</div>
+
+{% endblock %}

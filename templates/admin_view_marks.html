@@ -1,0 +1,215 @@
+{% extends "base_admin.html" %}
+
+{% block title %}View Marks - Admin Dashboard{% endblock %}
+{% block page_title %}👁️ View Marks{% endblock %}
+
+{% block content %}
+
+<!-- FILTER CARD -->
+<div class="panel">
+    <h2>🔍 Filter Marks</h2>
+    <div class="filter-grid">
+        <div class="form-group">
+            <label>Class</label>
+            <select id="filter-class">
+                <option value="">-- All Classes --</option>
+                {% for c in classes %}
+                <option value="{{ c }}">{{ c }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Section</label>
+            <select id="filter-section">
+                <option value="">-- All Sections --</option>
+                {% for s in sections %}
+                <option value="{{ s }}">{{ s }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Subject</label>
+            <select id="filter-subject">
+                <option value="">-- All Subjects --</option>
+                {% for sub in subjects %}
+                <option value="{{ sub.subject_name }}">{{ sub.subject_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Exam</label>
+            <select id="filter-exam">
+                <option value="">-- All Exams --</option>
+                {% for exam in exams %}
+                <option value="{{ exam.exam_name }}">{{ exam.exam_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group search-group">
+            <label>Search Student</label>
+            <input type="text" id="search-student" placeholder="Name or Student Code...">
+        </div>
+    </div>
+    <div style="text-align: right; margin-top: 15px;">
+        <button id="reset-filters" class="btn-primary" style="width: auto; padding: 10px 25px;">Reset Filters</button>
+    </div>
+</div>
+
+<!-- MARKS TABLE -->
+<div class="panel">
+    <h2>📋 Marks Records</h2>
+    {% if marks %}
+    <div class="table-responsive">
+        <table id="marks-table">
+            <thead>
+                <tr>
+                    <th>Sr No</th>
+                    <th>Student Name</th>
+                    <th>Student Code</th>
+                    <th>Class</th>
+                    <th>Section</th>
+                    <th>Subject</th>
+                    <th>Exam</th>
+                    <th>Marks</th>
+                    <th style="text-align: center;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in marks %}
+                <tr class="marks-row" 
+                    data-class="{{ m.students.class if m.students else '' }}"
+                    data-section="{{ m.students.section if m.students else '' }}"
+                    data-subject="{{ m.subjects.subject_name if m.subjects else '' }}"
+                    data-exam="{{ m.exams.exam_name if m.exams else '' }}"
+                    data-name="{{ m.students.name if m.students else '' }}"
+                    data-code="{{ m.students.student_code if m.students else '' }}">
+                    <td>{{ loop.index }}</td>
+                    <td>{{ m.students.name if m.students else 'N/A' }}</td>
+                    <td><code>{{ m.students.student_code if m.students else 'N/A' }}</code></td>
+                    <td>{{ m.students.class if m.students else 'N/A' }}</td>
+                    <td>{{ m.students.section if m.students else 'N/A' }}</td>
+                    <td>{{ m.subjects.subject_name if m.subjects else 'N/A' }}</td>
+                    <td>{{ m.exams.exam_name if m.exams else 'N/A' }}</td>
+                    <td>
+                        <strong>{{ m.marks_obtained }}</strong> 
+                        <span style="opacity: 0.7; font-size: 12px;">/ {{ m.subjects.max_marks if m.subjects else '100' }}</span>
+                    </td>
+                    <td style="text-align: center;">
+                        <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                            <a href="/admin/edit_mark/{{ m.id }}" class="quick-link-btn" style="padding: 6px 12px; margin: 0; font-size: 12px; border-radius: 6px; background: linear-gradient(45deg, #f6d365, #fda085); box-shadow: none;">✏️ Edit</a>
+                            <form action="/admin/delete_mark/{{ m.id }}" method="POST" style="margin: 0;" onsubmit="return confirm('Are you sure you want to delete this mark record?')">
+                                <button type="submit" style="padding: 6px 12px; margin: 0; font-size: 12px; border-radius: 6px; background: linear-gradient(45deg, #ff4f4f, #ff758c); color: white; border: none; font-weight: 600; width: auto; cursor: pointer; box-shadow: none;">🗑️ Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div id="no-results" class="no-data" style="display: none;">
+            No marks records match your filters.
+        </div>
+    </div>
+    {% else %}
+    <p class="no-data">No marks records found. Add marks through the Marks Management section.</p>
+    {% endif %}
+</div>
+
+<style>
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    align-items: end;
+}
+.filter-grid .form-group {
+    margin-bottom: 0;
+}
+.filter-grid select, .filter-grid input {
+    margin-bottom: 0;
+}
+@media(max-width: 768px) {
+    .filter-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const classFilter = document.getElementById('class-filter') || document.getElementById('filter-class');
+    const sectionFilter = document.getElementById('section-filter') || document.getElementById('filter-section');
+    const subjectFilter = document.getElementById('subject-filter') || document.getElementById('filter-subject');
+    const examFilter = document.getElementById('exam-filter') || document.getElementById('filter-exam');
+    const studentSearch = document.getElementById('student-search') || document.getElementById('search-student');
+    const resetBtn = document.getElementById('reset-filters');
+    
+    const rows = document.querySelectorAll('.marks-row');
+    const noResults = document.getElementById('no-results');
+
+    function filterTable() {
+        const classVal = classFilter.value.toLowerCase();
+        const sectionVal = sectionFilter.value.toLowerCase();
+        const subjectVal = subjectFilter.value.toLowerCase();
+        const examVal = examFilter.value.toLowerCase();
+        const searchVal = studentSearch.value.toLowerCase();
+
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const rowClass = row.getAttribute('data-class').toLowerCase();
+            const rowSection = row.getAttribute('data-section').toLowerCase();
+            const rowSubject = row.getAttribute('data-subject').toLowerCase();
+            const rowExam = row.getAttribute('data-exam').toLowerCase();
+            const rowName = row.getAttribute('data-name').toLowerCase();
+            const rowCode = row.getAttribute('data-code').toLowerCase();
+
+            const classMatch = !classVal || rowClass === classVal;
+            const sectionMatch = !sectionVal || rowSection === sectionVal;
+            const subjectMatch = !subjectVal || rowSubject === subjectVal;
+            const examMatch = !examVal || rowExam === examVal;
+            const searchMatch = !searchVal || rowName.includes(searchVal) || rowCode.includes(searchVal);
+
+            if (classMatch && sectionMatch && subjectMatch && examMatch && searchMatch) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Update serial numbers for visible rows
+        let currentIndex = 1;
+        rows.forEach(row => {
+            if (row.style.display !== 'none') {
+                row.cells[0].innerText = currentIndex++;
+            }
+        });
+
+        if (visibleCount === 0) {
+            noResults.style.display = 'block';
+        } else {
+            noResults.style.display = 'none';
+        }
+    }
+
+    classFilter.addEventListener('change', filterTable);
+    sectionFilter.addEventListener('change', filterTable);
+    subjectFilter.addEventListener('change', filterTable);
+    examFilter.addEventListener('change', filterTable);
+    studentSearch.addEventListener('input', filterTable);
+
+    resetBtn.addEventListener('click', function() {
+        classFilter.value = '';
+        sectionFilter.value = '';
+        subjectFilter.value = '';
+        examFilter.value = '';
+        studentSearch.value = '';
+        filterTable();
+    });
+});
+</script>
+{% endblock %}

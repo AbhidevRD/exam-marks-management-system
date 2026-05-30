@@ -1,0 +1,79 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Download Marksheets - Admin Dashboard{% endblock %}
+{% block page_title %}⬇️ Download Marksheets{% endblock %}
+
+{% block content %}
+
+<!-- DOWNLOAD OPTIONS -->
+<div class="dashboard-cards">
+    <div class="card">
+        <h3>Download Options</h3>
+        <p>Choose how you want to download marksheets</p>
+    </div>
+</div>
+
+<!-- DOWNLOAD ALL STUDENTS -->
+<div class="panel">
+    <h2>📊 All Students Marksheet</h2>
+    <p>Download complete marksheet for all students with all subjects and marks.</p>
+    <form method="POST" action="/download_all_excel">
+        <button type="submit" class="btn-primary">⬇️ Download All Students (Excel)</button>
+    </form>
+</div>
+
+<!-- SUBJECT-WISE DOWNLOAD -->
+<div class="panel">
+    <h2>📚 Subject-wise Marksheet</h2>
+    <p>Download marks for all students in a specific subject.</p>
+    <form method="POST" action="/download_subject_wise_excel">
+        <div class="form-group">
+            <label>Select Subject</label>
+            <select name="subject_id" required>
+                <option value="">-- Select Subject --</option>
+                {% for sub in subjects %}
+                <option value="{{ sub.id }}">{{ sub.subject_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn-primary">⬇️ Download Subject-wise (Excel)</button>
+    </form>
+</div>
+
+<!-- EXAM-WISE DOWNLOAD -->
+<div class="panel">
+    <h2>📝 Exam-wise Marksheet</h2>
+    <p>Download all marks for all students in a specific exam.</p>
+    <form method="POST" action="/download_exam_wise_excel">
+        <div class="form-group">
+            <label>Select Exam</label>
+            <select name="exam_id" required>
+                <option value="">-- Select Exam --</option>
+                {% for exam in exams %}
+                <option value="{{ exam.id }}">{{ exam.exam_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn-primary">⬇️ Download Exam-wise (Excel)</button>
+    </form>
+</div>
+
+<!-- STUDENT-WISE DOWNLOAD -->
+<div class="panel">
+    <h2>👤 Student-wise Marksheet</h2>
+    <p>Download individual marksheet for a specific student.</p>
+    <form method="POST" action="/download_student_wise_excel">
+        <div class="form-group">
+            <label>Select Student</label>
+            <select name="student_id" required>
+                <option value="">-- Select Student --</option>
+                {% for s in students %}
+                <option value="{{ s.id }}">{{ s.name }} ({{ s.student_code }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn-primary">⬇️ Download Student-wise (Excel)</button>
+    </form>
+</div>
+
+{% endblock %}
